@@ -9,10 +9,10 @@ package cn.hcw.algorithm;
  * 最后从首位比较，时间复杂度是1
  *
  */
-public class BubbleSort {
+public class BubbleSort extends Algorithm{
 
 
-    Integer[] arry  =  {121,4,432,1,342,2,523,23,423,23,423};
+
 
 
     public  void sort(Integer[] arry){
@@ -35,16 +35,6 @@ public class BubbleSort {
     }
 
 
-    public void printArray(Integer[] arry){
-        if (arry != null && arry.length>0){
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            for (int i=0;i<arry.length;i++){
-                System.out.print(arry[i]);
-                System.out.print(",");
-            }
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        }
-    }
 
 
     public static void main(String[] args) {
