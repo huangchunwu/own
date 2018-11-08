@@ -3,7 +3,7 @@ package cn.hcw.algorithm;
 /**
  * Created by huangchunwu on 2018/11/6.
  */
-public class Algorithm {
+public abstract class Algorithm {
 
     Integer[] arry = {121, 4, 432, 1, 342, 2, 523, 23, 423, 23, 422};
 
@@ -34,4 +34,6 @@ public class Algorithm {
         }
     }
 
+
+    public  abstract void  sort(Integer[] array);
 }

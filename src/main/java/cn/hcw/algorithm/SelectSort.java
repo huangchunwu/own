@@ -9,7 +9,7 @@ package cn.hcw.algorithm;
 public class SelectSort extends Algorithm{
 
 
-
+    @Override
     public void sort(Integer[] array){
 
         for (int i=0;i<array.length;i++){
