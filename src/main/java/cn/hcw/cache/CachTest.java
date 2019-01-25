@@ -4,10 +4,14 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,18 +29,34 @@ public class CachTest {
                     //构建cache实例
             .build();
 
-
-    final static LoadingCache<String, Integer> cache2 = CacheBuilder.newBuilder()
+    //LoadingCache 初始化
+    final static LoadingCache<String, Integer> loadCache = CacheBuilder.newBuilder()
             .maximumSize(10)  //最多存放十个数据
-            .expireAfterWrite(10, TimeUnit.SECONDS)  //缓存200秒
+                    // .expireAfterWrite(1, TimeUnit.SECONDS)  //缓存10秒
+            .refreshAfterWrite(1, TimeUnit.SECONDS) //刷新频率1S
             .recordStats()   //开启 记录状态数据功能
             .build(new CacheLoader<String, Integer>() {
                 //数据加载，默认返回-1,也可以是查询操作，如从DB查询
                 @Override
                 public Integer load(String key) throws Exception {
+                    System.out.println("key:"+key+">>>>>>load****");
                     return -1;
                 }
+
+                public ListenableFuture<String> reload(String key, String oldValue) throws Exception {
+                    System.out.println("......后台线程池异步刷新:" + key);
+                    return service.submit(new Callable<String>() {
+                        @Override
+                        public String call() throws Exception {
+                            return "";
+                        }
+                    });
+                }
+
             });
+
+    // guava线程池,用来产生ListenableFuture
+    private static ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10));
 
 
     @Test
@@ -58,6 +78,25 @@ public class CachTest {
             e.printStackTrace();
         }
 
+
+    }
+
+
+
+    @Test
+    public  void  testLoadCache(){
+        loadCache.put("1",1);
+        loadCache.put("key1",233);
+        int time = 1;
+        while(true) {
+            //System.out.println("第" + time++ + "次取到key1的值为：" + loadCache.getIfPresent("key1"));
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(cache.stats()); //获取统计信息
+        }
 
     }
 }
