@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * expireAfterWrite KEY超时的时候，guava会移除key，get请求的时候会堵塞线程，通过load（）加载新值
+ * refreshAfterWrite KEY到了设置的刷新时间，guava不会移除key，get请求的时候只会挑选一个线程去执行reload（）加载新值，其他线程则返回旧值
  * Created by Administrator on 2019/1/15 0015.
  */
 public class CachTest {
@@ -32,23 +34,24 @@ public class CachTest {
     //LoadingCache 初始化
     final static LoadingCache<String, Integer> loadCache = CacheBuilder.newBuilder()
             .maximumSize(10)  //最多存放十个数据
-                    // .expireAfterWrite(1, TimeUnit.SECONDS)  //缓存10秒
-            .refreshAfterWrite(1, TimeUnit.SECONDS) //刷新频率1S
+            .expireAfterWrite(4, TimeUnit.SECONDS)  //缓存4秒
+            .refreshAfterWrite(2, TimeUnit.SECONDS) //刷新频率2S
             .recordStats()   //开启 记录状态数据功能
             .build(new CacheLoader<String, Integer>() {
                 //数据加载，默认返回-1,也可以是查询操作，如从DB查询
                 @Override
                 public Integer load(String key) throws Exception {
-                    System.out.println("key:"+key+">>>>>>load****");
+                    System.out.println(Thread.currentThread().getName()+">>>>>key:"+key+">>>>>>load****");
                     return -1;
                 }
-
-                public ListenableFuture<String> reload(String key, String oldValue) throws Exception {
-                    System.out.println("......后台线程池异步刷新:" + key);
-                    return service.submit(new Callable<String>() {
+                @Override
+                public ListenableFuture<Integer> reload(String key, Integer oldValue) throws Exception {
+                    System.out.println(Thread.currentThread().getName()+"......后台线程池异步刷新:" + key);
+                    return service.submit(new Callable<Integer>() {
                         @Override
-                        public String call() throws Exception {
-                            return "";
+                        public Integer call() throws Exception {
+                            System.out.println(Thread.currentThread().getName()+">>>> refresh");
+                            return 99;
                         }
                     });
                 }
@@ -89,13 +92,45 @@ public class CachTest {
         loadCache.put("key1",233);
         int time = 1;
         while(true) {
-            //System.out.println("第" + time++ + "次取到key1的值为：" + loadCache.getIfPresent("key1"));
+            System.out.println("第" + time++ + "次取到key1的值为：" + loadCache.getIfPresent("key1"));
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             System.out.println(cache.stats()); //获取统计信息
+        }
+
+    }
+
+    @Test
+    public void testRefreshAndExpire(){
+        loadCache.put("ssa",1212);
+
+        try {
+            Thread.currentThread().sleep(1000 * 2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        for (int i=0;i<10;i++){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        System.out.println(Thread.currentThread().getName() +">>>get:"+loadCache.get("ssa"));
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+
+
+        try {
+            Thread.currentThread().sleep(1000 * 30);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
