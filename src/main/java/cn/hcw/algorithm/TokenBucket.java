@@ -3,7 +3,6 @@ package cn.hcw.algorithm;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
-import javafx.concurrent.Task;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
