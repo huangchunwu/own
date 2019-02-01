@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 /**
  * ThreadLocal 线程局部变量
  * 应用：可以用于单个线程的参数的存储，模板方法的上下文
+ * 比如Java7中的SimpleDateFormat不是线程安全的，可以用ThreadLocal来解决这个问题：
  * 注意事项：防止使用线程池，导致内存泄露
  * Created by huangchunwu on 2019/2/1.
  */
@@ -86,5 +87,7 @@ public class ThreadLocalExample {
             e.printStackTrace();
         }
     }
+
+
 
 }
