@@ -24,11 +24,16 @@ public class ExchangeTest {
         Runnable r1 = new Runnable() {
             @Override
             public void run() {
-                try {
-                    System.out.print(Thread.currentThread().getName() + "get " + exchanger.exchange(2019));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+//                try {
+//                    System.out.print(Thread.currentThread().getName() + "get " + exchanger.exchange(2019));
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+
+                while (true){
+
                 }
+
             }
         };
 
@@ -51,7 +56,7 @@ public class ExchangeTest {
         t2.setName("B");
 
         t1.start();
-        t2.start();
+       // t2.start();
 
         try {
             Thread.currentThread().sleep(1000000);
